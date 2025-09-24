@@ -46,9 +46,16 @@ cd Transaction-pismo
 ---
 
 ### ⚙️ Getting Started
+
+Buil Your Jar
+```
+mvn clean package -DskipTests
+```
+### Run Spring boot
 ```
 mvn spring-boot:run
 ```
+### OR
 ### 🐳 Run with Docker (optional)
 ```
 docker build -t transaction-pismo .
