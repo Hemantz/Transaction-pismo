@@ -129,6 +129,7 @@ Fail when operation type not found
 
 Fail when amount is zero or negative
 
+
 ### 📌 Future Improvements
 
 Add pagination & filters for transaction history
@@ -139,9 +140,9 @@ Add authentication & authorization
 
 Enhance observability (metrics, tracing)
 
-👨‍💻 Author
+## 👨‍💻 Author
 
-Hemant Bhardwaj
+Hemant Bhardwaj -
 Senior Software Engineer | Backend Specialist (Java, Spring, Microservices)
 ---
 
