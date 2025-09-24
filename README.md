@@ -47,19 +47,22 @@ cd Transaction-pismo
 
 ### ⚙️ Getting Started
 
+### How to build/run locally:
+
 ## Build Your Jar
 ```
-mvn clean package -DskipTests
+mvn clean install
 ```
-## Run Spring boot
+## Run Spring
 ```
 mvn spring-boot:run
 ```
 ### OR
-## 🐳 Run with Docker (optional)
+## 🐳 Run with Docker
 ```
 docker build -t transaction-pismo .
-docker run -d -p 8080:8080 transaction-pismo
+docker run -p 8080:8080 transaction-pismo
+
 ```
 
 ### 📖 API Endpoints
