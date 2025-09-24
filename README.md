@@ -35,60 +35,35 @@ The service allows creating accounts and recording transactions with different o
 ```bash
 git clone https://github.com/your-username/transaction-service.git
 cd transaction-pismo
-
+```
 ---
 
 ## ⚙️ Getting Started
-
-### Prerequisites
-- Java 17+
-- Maven 3.8+
-- Docker (optional, for running DB)
-
-### Clone the repository
-git clone <repo link>
-
+```
 mvn spring-boot:run
-
+```
 📖 API Endpoints
 Create Account
 ```
+curl --location 'http://localhost:8080/api/v1/accounts/create' \
+--header 'Content-Type: application/json' \
+--data '{"documentNumber":"12345678903"}'
 ```
 POST /accounts
-Content-Type: application/json
-
-{
-  "documentNumber": "12345678900"
-}
-
-
-Response
-
-{
-  "accountId": 1,
-  "documentNumber": "12345678900"
-}
-
-Create Transaction
-POST /transactions
-Content-Type: application/json
-
-{
-  "accountId": 1,
-  "operationTypeId": 4,
-  "amount": 123.45
-}
-
-
-Response
-
-{
-  "transactionId": 100,
-  "accountId": 1,
-  "operationTypeId": 4,
-  "amount": 123.45,
-  "eventDate": "2025-09-15T12:34:56Z"
-}
+```
+curl --location 'http://localhost:8080/api/v1/accounts/create' \
+--header 'Content-Type: application/json' \
+--data '{"documentNumber":"12345678903"}'
+```
+POSt /create
+```
+curl --location 'http://localhost:8080/api/v1/transactions/create' \
+--header 'Content-Type: application/json' \
+--data '{
+           "accountId": 1,
+           "operationTypeId": 1,
+           "amount": 100.50
+         }'
 ```
 
 ✅ Testing
@@ -129,11 +104,7 @@ Enhance observability (metrics, tracing)
 
 Hemant Bhardwaj
 Senior Software Engineer | Backend Specialist (Java, Spring, Microservices)
-
-
 ---
-
-Would you like me to also include a **sample Postman collection** (JSON export) in the README so you/your team can quickly test the APIs?
 
 
 
