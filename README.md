@@ -41,7 +41,7 @@ Built as part of the Pismo challenge, this project demonstrates clean architectu
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/Hemantz/Transaction-pismo.git
-cd Transaction-pismo
+cd transaction
 ```
 ---
 
