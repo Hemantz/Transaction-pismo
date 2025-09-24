@@ -1,39 +1,54 @@
-# Transaction Service
+# Transaction Service (Pismo Challenge)
 
-A Spring Boot microservice for managing financial transactions.  
-The service allows creating accounts and recording transactions with different operation types (e.g., purchase, payment, withdrawal).
+A Spring Boot microservice that manages **accounts** and **financial transactions**.  
+Built as part of the Pismo challenge, this project demonstrates clean architecture, exception handling, and unit testing in a financial domain use case.
+
+---
+
+## 📑 Table of Contents
+1. [Features](#-features)
+2. [Tech Stack & Prerequisites](#-tech-stack--prerequisites)
+3. [Getting Started](#-getting-started)
+4. [API Endpoints](#-api-endpoints)
+5. [Testing](#-testing)
+6. [Project Structure](#-project-structure)
+7. [Future Improvements](#-future-improvements)
+8. [Contributing & License](#-contributing--license)
 
 ---
 
 ## 🚀 Features
-- Create and manage accounts
-- Support multiple operation types (e.g., PURCHASE, PAYMENT, WITHDRAWAL)
-- Record and retrieve transactions
-- Input validations (e.g., amount > 0, valid account & operation type)
-- Exception handling for missing entities
+- Create and manage **accounts** using a unique document number  
+- Record **transactions** with associated operation types  
+- Support for positive and negative transaction values (e.g., purchases vs. payments)  
+- Centralized exception handling with meaningful error responses  
+- Repository layer for persistence (can integrate with H2/PostgreSQL)  
+- Unit tests covering both success and failure scenarios  
 
 ---
 
-## 🛠️ Tech Stack
-- Java 17+
-- Spring Boot
-- Spring Data JPA
-- H2 / PostgreSQL (configurable)
-- JUnit 5 + Mockito
-- Maven
+## 🛠 Tech Stack & Prerequisites
+- **Java 17+**  
+- **Spring Boot 3+**  
+- **Maven** (for build & dependency management)  
+- **H2 Database** (default, in-memory) or **PostgreSQL** (optional)  
+- (Optional) **Docker** for containerized deployment  
 
 ---
 
-## ⚙️ Getting Started
+## ⚡ Getting Started
 
-### Prerequisites
-- Java 17+
-- Maven 3.8+
-- Docker (optional, for running DB)
+### 1. Clone the Repository
+```bash
+git clone https://github.com/Hemantz/Transaction-pismo.git
+cd Transaction-pismo
+```
+
+### Create Account  
 
 ### Clone the repository
 ```bash
-git clone https://github.com/your-username/transaction-service.git
+git clone https://github.com/Hemantz/Transaction-pismo.git
 cd transaction-pismo
 ```
 ---
