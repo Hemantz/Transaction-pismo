@@ -44,8 +44,6 @@ git clone https://github.com/Hemantz/Transaction-pismo.git
 cd Transaction-pismo
 ```
 
-### Create Account  
-
 ### Clone the repository
 ```bash
 git clone https://github.com/Hemantz/Transaction-pismo.git
@@ -53,24 +51,39 @@ cd transaction-pismo
 ```
 ---
 
-## ⚙️ Getting Started
+### ⚙️ Getting Started
 ```
 mvn spring-boot:run
 ```
-📖 API Endpoints
-Create Account
+### 📖 API Endpoints
+## POST Create Account
 ```
 curl --location 'http://localhost:8080/api/v1/accounts/create' \
 --header 'Content-Type: application/json' \
 --data '{"documentNumber":"12345678903"}'
 ```
-POST /accounts
+Response
 ```
-curl --location 'http://localhost:8080/api/v1/accounts/create' \
---header 'Content-Type: application/json' \
---data '{"documentNumber":"12345678903"}'
+{
+  "accountId": 1,
+  "documentNumber": "12345678900"
+}
+
 ```
-POSt /create
+## GET Get Accounts
+Request
+```
+curl --location 'http://localhost:8080/api/v1/accounts/1'
+```
+Response
+```
+{
+    "accountId": 1,
+    "documentNumber": "12345678903"
+}
+```
+
+## POST Create Transaction
 ```
 curl --location 'http://localhost:8080/api/v1/transactions/create' \
 --header 'Content-Type: application/json' \
@@ -79,6 +92,16 @@ curl --location 'http://localhost:8080/api/v1/transactions/create' \
            "operationTypeId": 1,
            "amount": 100.50
          }'
+```
+Response
+```
+{
+  "transactionId": 10,
+  "accountId": 1,
+  "operationTypeId": 4,
+  "amount": -123.45,
+  "eventDate": "2025-09-15T10:25:32.000Z"
+}
 ```
 
 ✅ Testing
@@ -101,7 +124,7 @@ Fail when amount is zero or negative
 
 ```
 🐳 Run with Docker (optional)
-docker build -t transaction-service .
+docker build -t transaction- .
 docker run -p 8080:8080 transaction-service
 ```
 
