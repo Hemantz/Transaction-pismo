@@ -28,10 +28,10 @@ Built as part of the Pismo challenge, this project demonstrates clean architectu
 ---
 
 ## 🛠 Tech Stack & Prerequisites
-- **Java 17+**  
+- **Java 21**  
 - **Spring Boot 3+**  
 - **Maven** (for build & dependency management)  
-- **H2 Database** (default, in-memory) or **PostgreSQL** (optional)  
+- **H2 Database** (default, in-memory)
 - (Optional) **Docker** for containerized deployment  
 
 ---
@@ -47,16 +47,16 @@ cd Transaction-pismo
 
 ### ⚙️ Getting Started
 
-Buil Your Jar
+## Build Your Jar
 ```
 mvn clean package -DskipTests
 ```
-### Run Spring boot
+## Run Spring boot
 ```
 mvn spring-boot:run
 ```
 ### OR
-### 🐳 Run with Docker (optional)
+## 🐳 Run with Docker (optional)
 ```
 docker build -t transaction-pismo .
 docker run -d -p 8080:8080 transaction-pismo
