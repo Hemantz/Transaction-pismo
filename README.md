@@ -43,18 +43,18 @@ Built as part of the Pismo challenge, this project demonstrates clean architectu
 git clone https://github.com/Hemantz/Transaction-pismo.git
 cd Transaction-pismo
 ```
-
-### Clone the repository
-```bash
-git clone https://github.com/Hemantz/Transaction-pismo.git
-cd transaction-pismo
-```
 ---
 
 ### ⚙️ Getting Started
 ```
 mvn spring-boot:run
 ```
+### 🐳 Run with Docker (optional)
+```
+docker build -t transaction-pismo .
+docker run -d -p 8080:8080 transaction-pismo
+```
+
 ### 📖 API Endpoints
 ## POST Create Account
 ```
@@ -104,7 +104,7 @@ Response
 }
 ```
 
-✅ Testing
+### ✅ Testing
 
 Run all tests with:
 ```
@@ -112,7 +112,7 @@ mvn test
 ```
 
 
-Key test cases:
+### Key test cases:
 
 Create transaction successfully
 
@@ -122,13 +122,7 @@ Fail when operation type not found
 
 Fail when amount is zero or negative
 
-```
-🐳 Run with Docker (optional)
-docker build -t transaction- .
-docker run -p 8080:8080 transaction-service
-```
-
-📌 Future Improvements
+### 📌 Future Improvements
 
 Add pagination & filters for transaction history
 
