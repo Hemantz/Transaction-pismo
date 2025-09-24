@@ -24,22 +24,6 @@ The service allows creating accounts and recording transactions with different o
 
 ---
 
-## 📂 Project Structure
-src/
-├── main/
-│ ├── java/com/pismo/transaction/
-│ │ ├── dto/ # DTOs for requests & responses
-│ │ ├── entity/ # Entities (Account, Transaction, OperationType)
-│ │ ├── repository/ # Spring Data JPA Repositories
-│ │ ├── service/ # Service interfaces
-│ │ └── service/impl/ # Service implementations
-│ └── resources/
-│ └── application.yml # Config (DB, server port, etc.)
-└── test/
-└── java/com/pismo/transaction/ # Unit tests
-
----
-
 ## ⚙️ Getting Started
 
 ### Prerequisites
