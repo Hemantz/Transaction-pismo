@@ -27,5 +27,14 @@ public class Transaction {
     private BigDecimal amount;
 
     @Column(nullable = false)
+    private BigDecimal balance;
+
+    @PrePersist
+    public  void intiBalance(){
+            this.balance = this.amount;
+    }
+    @Column(nullable = false)
     private OffsetDateTime eventDate = OffsetDateTime.now();
+
+
 }
