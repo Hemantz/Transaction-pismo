@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -71,16 +72,20 @@ public class TransactionServiceImpl implements TransactionService {
         tx.setAmount(computedAmount);
         tx.setEventDate(OffsetDateTime.now());
 
-        Transaction saved = transactionRepository.save(tx);
+        Transaction savedTxn = transactionRepository.save(tx);
 
-        log.info("Transaction created transactionId={} finalAmount={}", saved.getTransactionId(), saved.getAmount());
+        if (savedTxn.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+            dischargeDebits(savedTxn);
+        }
+
+        log.info("Transaction created transactionId={} finalAmount={}", savedTxn.getTransactionId(), savedTxn.getAmount());
 
         return new TransactionResponse(
-                saved.getTransactionId(),
+                savedTxn.getTransactionId(),
                 account.getAccountId(),
                 opType.getOperationTypeId(),
-                saved.getAmount(),
-                saved.getEventDate()
+                savedTxn.getAmount(),
+                savedTxn.getEventDate()
         );
     }
 
@@ -96,4 +101,29 @@ public class TransactionServiceImpl implements TransactionService {
                 ? amount.abs().negate() // purchase, withdrawal
                 : amount.abs();         // payment
     }
+
+
+    private void dischargeDebits(Transaction transaction) {
+        BigDecimal available = transaction.getBalance();
+
+        //fetch only debits of the account
+        List<Transaction> allDebitTransaction = transactionRepository.findAllDebitTransaction(transaction.getAccount().getAccountId());
+        for (Transaction debt : allDebitTransaction) {
+            if (available.compareTo(BigDecimal.ZERO) <= 0) break;
+
+            BigDecimal debtBalance = debt.getBalance().abs();
+            BigDecimal dischargeAmount = available.min(debtBalance);
+
+            //Update debt
+            debt.setBalance(debt.getBalance().add(dischargeAmount));
+
+            //reduce payment
+            available = available.subtract(dischargeAmount);
+            transactionRepository.save(debt);
+        }
+        //update payment row
+        transaction.setBalance(available);
+        transactionRepository.save(transaction);
+    }
+
 }
