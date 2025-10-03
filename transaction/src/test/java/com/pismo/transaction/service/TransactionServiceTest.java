@@ -16,6 +16,7 @@ import com.pismo.transaction.service.impl.TransactionServiceImpl;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,23 +33,7 @@ public class TransactionServiceTest {
 
         TransactionService service = new TransactionServiceImpl(accountRepo, opRepo, txRepo);
 
-        Account account = new Account();
-        account.setAccountId(1L);
-        account.setDocumentNumber("12345678900");
-
-        OperationType payment = new OperationType();
-        payment.setOperationTypeId(4);
-        payment.setDescription("PAYMENT");
-        payment.setDirection(OperationDirection.CREDIT);
-
-        when(accountRepo.findById(1L)).thenReturn(Optional.of(account));
-        when(opRepo.findById(4)).thenReturn(Optional.of(payment));
-
-        Transaction tx = new Transaction();
-        tx.setTransactionId(100L);
-        tx.setAccount(account);
-        tx.setOperationType(payment);
-        tx.setAmount(BigDecimal.valueOf(123.45));
+        Transaction tx = getTransaction(accountRepo, opRepo);
 
         when(txRepo.save(any(Transaction.class))).thenReturn(tx);
 
@@ -58,6 +43,29 @@ public class TransactionServiceTest {
         assertThat(response.transactionId()).isEqualTo(100L);
         assertThat(response.accountId()).isEqualTo(1L);
         assertThat(response.amount()).isEqualTo(BigDecimal.valueOf(123.45));
+    }
+
+
+    private static Transaction getTransaction(AccountRepository accountRepo, OperationTypeRepository opRepo) {
+        OperationType payment = new OperationType();
+        payment.setOperationTypeId(4);
+        payment.setDescription("PAYMENT");
+        payment.setDirection(OperationDirection.CREDIT);
+
+        Account account = new Account();
+        account.setAccountId(1L);
+        account.setDocumentNumber("12345678900");
+
+        when(accountRepo.findById(1L)).thenReturn(Optional.of(account));
+        when(opRepo.findById(4)).thenReturn(Optional.of(payment));
+
+        Transaction tx = new Transaction();
+        tx.setTransactionId(100L);
+        tx.setAccount(account);
+        tx.setBalance(BigDecimal.valueOf(60));
+        tx.setOperationType(payment);
+        tx.setAmount(BigDecimal.valueOf(123.45));
+        return tx;
     }
 
     @Test
@@ -185,6 +193,177 @@ public class TransactionServiceTest {
                 .hasMessageContaining("DB error");
     }
 
+    @Test
+    void createTransaction_shouldDischargeDebitsProperly() {
+        AccountRepository accountRepo = mock(AccountRepository.class);
+        OperationTypeRepository opRepo = mock(OperationTypeRepository.class);
+        TransactionRepository txRepo = mock(TransactionRepository.class);
 
+        TransactionServiceImpl service = new TransactionServiceImpl(accountRepo, opRepo, txRepo);
 
+        Account account = new Account();
+        account.setAccountId(1L);
+
+        OperationType payment = new OperationType();
+        payment.setOperationTypeId(4);
+        payment.setDirection(OperationDirection.CREDIT);
+
+        when(accountRepo.findById(1L)).thenReturn(Optional.of(account));
+        when(opRepo.findById(4)).thenReturn(Optional.of(payment));
+
+        // Existing debit transactions
+        Transaction debit1 = new Transaction();
+        debit1.setTransactionId(101L);
+        debit1.setAccount(account);
+        debit1.setAmount(BigDecimal.valueOf(-50));  // negative debit
+        debit1.setBalance(BigDecimal.valueOf(-50));
+
+        Transaction debit2 = new Transaction();
+        debit2.setTransactionId(102L);
+        debit2.setAccount(account);
+        debit2.setAmount(BigDecimal.valueOf(-30));  // negative debit
+        debit2.setBalance(BigDecimal.valueOf(-30));
+
+        when(txRepo.findAllDebitTransaction(1L)).thenReturn(List.of(debit1, debit2));
+
+        // Save payment transaction
+        Transaction paymentTx = new Transaction();
+        paymentTx.setTransactionId(200L);
+        paymentTx.setAccount(account);
+        paymentTx.setAmount(BigDecimal.valueOf(60));  // payment amount
+        paymentTx.setBalance(BigDecimal.valueOf(60));
+
+        Transaction tx = getTransaction(accountRepo, opRepo);
+        when(txRepo.save(any(Transaction.class))).thenReturn(tx);
+
+        TransactionRequest req = new TransactionRequest(1L, 4, BigDecimal.valueOf(60));
+        service.createTransaction(req);
+
+        // Verify debits are partially discharged
+        assertThat(debit1.getBalance()).isEqualTo(BigDecimal.valueOf(0)); // fully discharged
+        assertThat(debit2.getBalance()).isEqualTo(BigDecimal.valueOf(-20)); // partially discharged
+
+        // Verify payment balance updated
+        assertThat(paymentTx.getBalance()).isEqualTo(BigDecimal.valueOf(60));
+
+        // Verify repository save calls
+        verify(txRepo, atLeast(3)).save(any(Transaction.class));
+    }
+
+    @Test
+    void createTransaction_shouldHandlePaymentWhenNoDebitsExist() {
+        AccountRepository accountRepo = mock(AccountRepository.class);
+        OperationTypeRepository opRepo = mock(OperationTypeRepository.class);
+        TransactionRepository txRepo = mock(TransactionRepository.class);
+
+        TransactionServiceImpl service = new TransactionServiceImpl(accountRepo, opRepo, txRepo);
+
+        Transaction tx = getTransaction(accountRepo, opRepo);
+
+        when(txRepo.save(any(Transaction.class))).thenReturn(tx);
+
+        Account account = new Account();
+        account.setAccountId(1L);
+
+        OperationType payment = new OperationType();
+        payment.setOperationTypeId(4);
+        payment.setDirection(OperationDirection.CREDIT);
+
+        when(accountRepo.findById(1L)).thenReturn(Optional.of(account));
+        when(opRepo.findById(4)).thenReturn(Optional.of(payment));
+        when(txRepo.findAllDebitTransaction(1L)).thenReturn(List.of()); // no debits
+
+        TransactionRequest req = new TransactionRequest(tx.getAccount().getAccountId(), 4, tx.getAmount());
+        TransactionResponse transaction = service.createTransaction(req);
+
+        assertThat(transaction.amount()).isEqualTo(BigDecimal.valueOf(123.45));
+    }
+
+    @Test
+    void createTransaction_shouldPartiallyDischargeDebit() {
+        AccountRepository accountRepo = mock(AccountRepository.class);
+        OperationTypeRepository opRepo = mock(OperationTypeRepository.class);
+        TransactionRepository txRepo = mock(TransactionRepository.class);
+
+        TransactionServiceImpl service = new TransactionServiceImpl(accountRepo, opRepo, txRepo);
+
+        Account account = new Account();
+        account.setAccountId(1L);
+
+        OperationType payment = new OperationType();
+        payment.setOperationTypeId(4);
+        payment.setDirection(OperationDirection.CREDIT);
+
+        Transaction debit = new Transaction();
+        debit.setTransactionId(101L);
+        debit.setAccount(account);
+        debit.setBalance(BigDecimal.valueOf(-200));
+
+        when(accountRepo.findById(1L)).thenReturn(Optional.of(account));
+        when(opRepo.findById(4)).thenReturn(Optional.of(payment));
+        when(txRepo.findAllDebitTransaction(1L)).thenReturn(List.of(debit));
+        Transaction tx = getTransaction(accountRepo, opRepo);
+        when(txRepo.save(any(Transaction.class))).thenReturn(tx);
+
+        TransactionRequest req = new TransactionRequest(1L, 4, BigDecimal.valueOf(50));
+        service.createTransaction(req);
+
+        // Debit partially discharged
+        assertThat(debit.getBalance()).isEqualTo(BigDecimal.valueOf(-140));
+    }
+    @Test
+    void createTransaction_shouldNotDischargeAlreadyClearedDebits() {
+        AccountRepository accountRepo = mock(AccountRepository.class);
+        OperationTypeRepository opRepo = mock(OperationTypeRepository.class);
+        TransactionRepository txRepo = mock(TransactionRepository.class);
+
+        TransactionServiceImpl service = new TransactionServiceImpl(accountRepo, opRepo, txRepo);
+
+        Account account = new Account();
+        account.setAccountId(1L);
+
+        OperationType payment = new OperationType();
+        payment.setOperationTypeId(4);
+        payment.setDirection(OperationDirection.CREDIT);
+
+        Transaction debit = new Transaction();
+        debit.setTransactionId(101L);
+        debit.setAccount(account);
+        debit.setBalance(BigDecimal.ZERO); // already cleared
+
+        when(accountRepo.findById(1L)).thenReturn(Optional.of(account));
+        when(opRepo.findById(4)).thenReturn(Optional.of(payment));
+        when(txRepo.findAllDebitTransaction(1L)).thenReturn(List.of(debit));
+        Transaction tx = getTransaction(accountRepo, opRepo);
+        when(txRepo.save(any(Transaction.class))).thenReturn(tx);
+        TransactionRequest req = new TransactionRequest(1L, 4, BigDecimal.valueOf(50));
+        service.createTransaction(req);
+
+        assertThat(debit.getBalance()).isEqualTo(BigDecimal.ZERO); // unchanged
+    }
+    @Test
+    void createTransaction_shouldThrowWhenPaymentSaveFails() {
+        AccountRepository accountRepo = mock(AccountRepository.class);
+        OperationTypeRepository opRepo = mock(OperationTypeRepository.class);
+        TransactionRepository txRepo = mock(TransactionRepository.class);
+
+        TransactionServiceImpl service = new TransactionServiceImpl(accountRepo, opRepo, txRepo);
+
+        Account account = new Account();
+        account.setAccountId(1L);
+
+        OperationType payment = new OperationType();
+        payment.setOperationTypeId(4);
+        payment.setDirection(OperationDirection.CREDIT);
+
+        when(accountRepo.findById(1L)).thenReturn(Optional.of(account));
+        when(opRepo.findById(4)).thenReturn(Optional.of(payment));
+        when(txRepo.findAllDebitTransaction(1L)).thenReturn(List.of());
+        when(txRepo.save(any(Transaction.class))).thenThrow(new RuntimeException("DB down"));
+
+        TransactionRequest req = new TransactionRequest(1L, 4, BigDecimal.valueOf(50));
+        assertThatThrownBy(() -> service.createTransaction(req))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("DB down");
+    }
 }
