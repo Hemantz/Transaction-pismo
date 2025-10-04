@@ -11,15 +11,15 @@ Built as part of the Pismo challenge, this project demonstrates clean architectu
 3. [Getting Started](#-getting-started)
 4. [API Endpoints](#-api-endpoints)
 5. [Testing](#-testing)
-6. [Project Structure](#-project-structure)
-7. [Future Improvements](#-future-improvements)
-8. [Contributing & License](#-contributing--license)
+6. [Future Improvements](#-future-improvements)
+7. [Author](#-author)
 
 ---
 
 ## 🚀 Features
 - Create and manage **accounts** using a unique document number  
-- Record **transactions** with associated operation types  
+- Record **transactions** with associated operation types
+- Discharge debit transactions automatically when a payment is made 
 - Support for positive and negative transaction values (e.g., purchases vs. payments)  
 - Centralized exception handling with meaningful error responses  
 - Repository layer for persistence (can integrate with H2/PostgreSQL)  
